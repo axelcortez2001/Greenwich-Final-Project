@@ -1,0 +1,15 @@
+ document.addEventListener('DOMContentLoaded', function() {
+        // Get the dropdown element
+        var dropdown = document.querySelector('.relative');
+        var dropdown1 = document.querySelector('.rel');
+        // Add event listener to show/hide dropdown on click
+        dropdown.addEventListener('click', function() {
+            var submenu = this.querySelector('ul');
+            submenu.classList.toggle('hidden');
+        });
+        dropdown1.addEventListener('click', function() {
+            var submenu = this.querySelector('ul');
+            submenu.classList.toggle('hidden');
+        });
+        
+    });

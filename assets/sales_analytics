@@ -1,0 +1,103 @@
+var dailySalesData = <?php echo json_encode($daily_sales); ?>;
+var monthlySalesData = <?php echo json_encode($monthly_sales); ?>;
+var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+var dailySalesChart = null;
+var monthlySalesChart = null;
+
+// Function to filter sales data by month
+function filterSalesByMonth(month) {
+    if (month === '0') {
+        return dailySalesData;
+    } else {
+        return dailySalesData.filter(function (item) {
+            var itemDate = new Date(item.date);
+            var itemMonth = itemDate.getMonth() + 1;
+            return itemMonth === parseInt(month);
+        });
+    }
+}
+
+function updateChart(selectedMonth) {
+    var filteredSalesData = filterSalesByMonth(selectedMonth);
+
+    var dailyLabels = filteredSalesData.map(function (item) {
+        return item.date;
+    });
+    var dailyAmounts = filteredSalesData.map(function (item) {
+        return item.dailysales;
+    });
+
+    if (dailySalesChart !== null) {
+        dailySalesChart.destroy();
+    }
+
+    var dailySalesCtx = document.getElementById('dailySalesChart').getContext('2d');
+    dailySalesChart = new Chart(dailySalesCtx, {
+        type: 'line', 
+        data: {
+            labels: dailyLabels,
+            datasets: [{
+                label: 'Daily Sales',
+                data: dailyAmounts,
+                borderColor: 'rgb(57, 255, 20)',
+                borderWidth: 1,
+                fill: false, 
+                
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    updateSlySalesChart();
+}
+
+function updateMonthlySalesChart() {
+    var monthlyLabels = monthNames;
+    var monthlyAmounts = [];
+
+    for (var i = 0; i < 12; i++) {
+        var monthLabel = monthNames[i];
+        var monthlySale = monthlySalesData.find(function (item) {
+            return item.month === monthLabel;
+        });
+        var salesAmount = monthlySale ? monthlySale.sales : 0;
+        monthlyAmounts.push(salesAmount);
+    }
+
+    if (monthlySalesChart !== null) {
+        monthlySalesChart.destroy();
+    }
+
+    var monthlySalesCtx = document.getElementById('monthlySalesChart').getContext('2d');
+    monthlySalesChart = new Chart(monthlySalesCtx, {
+        type: 'line', 
+        data: {
+            labels: monthlyLabels,
+            datasets: [{
+                label: 'Monthly Sales',
+                data: monthlyAmounts,
+                borderColor: 'rgb(57, 255, 20)',
+                borderWidth: 1,
+                fill: false, 
+                color: 'rgb(57, 255, 20)',
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+updateChart('0');

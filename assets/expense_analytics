@@ -1,0 +1,97 @@
+        var dailyexpensedata = <?php echo json_encode($daily_expense); ?>;
+        var monthlyexpensedata = <?php echo json_encode($monthly_expense); ?>;
+        var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        var dailyExpenseChart = null;
+        var monthlyExpenseChart = null;
+
+        // Function to filter sales data by month
+        function filterSalesByMonth(month) {
+            if (month === '0') {
+                return dailyexpensedata;
+            } else {
+                return dailyexpensedata.filter(function(item) {
+                    var itemDate = new Date(item.date);
+                    var itemMonth = itemDate.getMonth() + 1;
+                    return itemMonth === parseInt(month);
+                });
+            }
+        }
+
+        function updateChart(selectedMonth) {
+            var filteredSalesData = filterSalesByMonth(selectedMonth);
+
+            var dailyLabels = filteredSalesData.map(function(item) {
+                return item.date;
+            });
+            var dailyAmounts = filteredSalesData.map(function(item) {
+                return item.dailysales;
+            });
+
+            if (dailyExpenseChart !== null) {
+                dailyExpenseChart.destroy();
+            }
+
+            var dailyExpenseCtx = document.getElementById('dailyExpenseChart').getContext('2d');
+            dailyExpenseChart = new Chart(dailyExpenseCtx, {
+                type: 'line',
+                data: {
+                    labels: dailyLabels,
+                    datasets: [{
+                        label: 'Daily Expense',
+                        data: dailyAmounts,
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgb(57, 255, 20)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            updateMonthlySalesChart();
+        }
+
+        function updateMonthlySalesChart() {
+            var monthlyLabels = monthNames;
+            var monthlyAmounts = [];
+
+            for (var i = 0; i < 12; i++) {
+                var monthLabel = monthNames[i];
+                var monthlySale = monthlyexpensedata.find(function(item) {
+                    return item.month === monthLabel;
+                });
+                var salesAmount = monthlySale ? monthlySale.sales : 0;
+                monthlyAmounts.push(salesAmount);
+            }
+            if (monthlyExpenseChart !== null) {
+                monthlyExpenseChart.destroy();
+            }
+            var monthlySalesCtx = document.getElementById('monthlyExpenseChart').getContext('2d');
+            monthlyExpenseChart = new Chart(monthlySalesCtx, {
+                type: 'line',
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [{
+                        label: 'Monthly Expense',
+                        data: monthlyAmounts,
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgb(57, 255, 20)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        updateChart('0');

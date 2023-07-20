@@ -1,0 +1,140 @@
+var dailyexpensedata = <?php echo json_encode($daily_expense); ?>;
+var dailySalesData = <?php echo json_encode($daily_sales); ?>;
+var monthlyexpensedata = <?php echo json_encode($monthly_expense); ?>;
+var monthlySalesData = <?php echo json_encode($monthly_sales); ?>;
+var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+var dailyExpenseChart = null;
+var monthlyExpenseChart = null;
+
+// Function to filter daily data by month
+function filterDailyDataByMonth(data, month) {
+    if (month === '0') {
+        return data;
+    } else {
+        return data.filter(function(item) {
+            var itemDate = new Date(item.date);
+            var itemMonth = itemDate.getMonth() + 1;
+            return itemMonth === parseInt(month);
+        });
+    }
+}
+
+// Function to filter monthly data by month (if needed in the future)
+function filterMonthlyDataByMonth(data, month) {
+    if (month === '0') {
+        return data;
+    } else {
+        // Your filtering logic for monthly data here (if required in the future)
+        return data;
+    }
+}
+
+function updateChart(selectedMonth) {
+    var filteredDailyExpenseData = filterDailyDataByMonth(dailyexpensedata, selectedMonth);
+    var filteredDailySalesData = filterDailyDataByMonth(dailySalesData, selectedMonth);
+
+    var dailyExpenseLabels = filteredDailyExpenseData.map(function(item) {
+        return item.date;
+    });
+    var dailySalesLabels = filteredDailySalesData.map(function(item) {
+        return item.date;
+    });
+    var dailyAmountsexpense = filteredDailyExpenseData.map(function(item) {
+        return item.dailysales;
+    });
+    var dailyAmountssales = filteredDailySalesData.map(function(item) {
+        return item.dailysales;
+    });
+
+    if (dailyExpenseChart !== null) {
+        dailyExpenseChart.destroy();
+    }
+
+    var dailyCtx = document.getElementById('dailyExpenseChart').getContext('2d');
+    dailyExpenseChart = new Chart(dailyCtx, {
+        type: 'line',
+        data: {
+            labels: dailyExpenseLabels,
+            datasets: [{
+                label: 'Daily Expense',
+                data: dailyAmountsexpense,
+                borderColor: 'rgb(57, 255, 20)', 
+                borderWidth: 1,
+                fill: false,
+            },
+            {
+                label: 'Daily Sales',
+                data: dailyAmountssales,
+                borderColor: 'rgb(255, 99, 132)', 
+                borderWidth: 1,
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    updateMonthlySalesChart();
+}
+
+
+
+   function updateMonthlySalesChart() {
+       var monthlyLabels = monthNames;
+       var monthlyAmountsexpense = monthlyLabels.map(function(monthLabel) {
+           var monthlyExpense = monthlyexpensedata.find(function(item) {
+               return item.month === monthLabel;
+           });
+           return monthlyExpense ? monthlyExpense.sales : 0;
+       });
+
+       var monthlyAmountssales = monthlyLabels.map(function(monthLabel) {
+           var monthlySales = monthlySalesData.find(function(item) {
+               return item.month === monthLabel;
+           });
+           return monthlySales ? monthlySales.sales : 0;
+       });
+
+       if (monthlyExpenseChart !== null) {
+           monthlyExpenseChart.destroy();
+       }
+
+      
+
+       var monthlyCtx = document.getElementById('monthlyExpenseChart').getContext('2d');
+       monthlyChart = new Chart(monthlyCtx, {
+           type: 'line',
+           data: {
+               labels: monthlyLabels,
+               datasets: [{
+                   label: 'Monthly Expense',
+                   data: monthlyAmountsexpense,
+                   borderColor: 'rgb(0, 204, 102)', // Custom color for monthly expense line
+                   borderWidth: 1,
+                   fill: false,
+               },
+               {
+                   label: 'Monthly Sales',
+                   data: monthlyAmountssales,
+                   borderColor: 'rgb(255, 153, 51)', // Custom color for monthly sales line
+                   borderWidth: 1,
+                   fill: false,
+               }]
+           },
+           options: {
+               responsive: true,
+               scales: {
+                   y: {
+                       beginAtZero: true
+                   }
+               }
+           }
+       });
+   }
+   updateChart('0');
+
